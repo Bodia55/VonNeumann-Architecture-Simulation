@@ -451,5 +451,25 @@ public class Main {
          main.writeBack();
          System.out.println();
       }
+
+      // print all registers and their values
+      System.out.println("Registers:");
+      for (int i = 0; i < 32; i++) {
+         System.out.println("R" + i + ": " + main.registers[i]);
+      }
+
+      System.out.println();
+
+      // print all memory addresses and their values
+      System.out.println("Memory:\n");
+      System.out.println("Instructions:");
+      for (int i = 0; i < 2048; i++) {
+         if (i < 1024)
+            System.out.println("Memory[" + i + "]: " + Parser.toBinary(main.memory[i]));
+         else
+            System.out.println("Memory[" + i + "]: " + main.memory[i]);
+         if (i == 1023)
+            System.out.println("\nData:");
+      }
    }
 }
