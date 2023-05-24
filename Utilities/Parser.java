@@ -99,6 +99,8 @@ public class Parser {
         } else {
             // Set Immediate
             int immediate = Integer.parseInt(arrInstruction[3]);
+            // mask immediate to only the 18 lsb
+            immediate = immediate & 0x0003FFFF;
             instruction = instruction << 18;
             instruction = instruction | immediate;
         }

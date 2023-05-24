@@ -151,11 +151,15 @@ public class Main {
       }
 
       pc++;
-      System.out.println("Fetch Stage: Instruction " + pc);
-      System.out.println("PC has changed from " + (pc - 1) + " to " + pc);
+      System.out.println("\n[1] Fetch Stage  # Instruction " + (pc) + " #");
+      System.out.println("\nPC has changed from " + (pc - 1) + " to " + pc);
 
       fetchDecodeRegTemp.put("instruction", currInstruction);
       fetchDecodeRegTemp.put("pc", pc);
+
+      // print the outputs
+      System.out.println("\nOutputs:\nInstruction: " + Parser.toBinary(currInstruction));
+      System.out.println("PC: " + pc);
 
    }
 
@@ -182,17 +186,27 @@ public class Main {
       }
 
       int instruction = fetchDecodeReg.get("instruction");
+      System.out.println("\n[2] Decode Stage  # Instruction " + (currPc) + " #");
+      System.out.println("\nInputs:\nInstruction: " + Parser.toBinary(instruction));
+
       int opcode = instruction >>> 28;
       int rd = (instruction >>> 23) & 0x1F;
       int rs = (instruction >>> 18) & 0x1F;
       int rt = (instruction >>> 13) & 0x1F;
       int shamt = (instruction) & 0x1FFF;
+
+      // the immediate is a 2's complement number so can be negative
       int immediate = instruction & 0x3FFFF;
+
+      // if the immediate is negative, sign extend it
+      if ((immediate & 0x20000) != 0) {
+         immediate = immediate | 0xFFFC0000;
+      }
       int address = instruction & 0xFFFFFFF;
       int rdValue = registers[rd];
+      int rsValue = registers[rs];
+      int rtValue = registers[rt];
 
-      System.out.println("Decode Stage: Instruction " + (fetchDecodeReg.get("pc")));
-      System.out.println("Instruction: " + Parser.toBinary(instruction));
       System.out.println("RD (R" + rd + "): " + registers[rd]);
       // print rdvalue
 
@@ -204,9 +218,19 @@ public class Main {
       decodeExecuteRegTemp.put("immediate", immediate);
       decodeExecuteRegTemp.put("address", address);
       decodeExecuteRegTemp.put("rdValue", rdValue);
-      decodeExecuteRegTemp.put("rsValue", registers[rs]);
-      decodeExecuteRegTemp.put("rtValue", registers[rt]);
+      decodeExecuteRegTemp.put("rsValue", rsValue);
+      decodeExecuteRegTemp.put("rtValue", rtValue);
       decodeExecuteRegTemp.put("rd", rd);
+
+      // print all outputs
+      System.out.println("\nOutputs:");
+      System.out.println("Opcode: " + opcode);
+      System.out.println("RD (R" + rd + ") Value:" + rdValue);
+      System.out.println("Read Data 1 " + rsValue);
+      System.out.println("Read Data 2 " + rtValue);
+      System.out.println("Shamt: " + shamt);
+      System.out.println("Immediate: " + immediate);
+      System.out.println("Address: " + address);
 
       // Reset decodeRepeat
       decodeRepeat = 0;
@@ -236,7 +260,7 @@ public class Main {
 
       }
 
-      System.out.println("Execute Stage: Instruction " + (currPc));
+      System.out.println("\n[3] Execute Stage  # Instruction " + (currPc) + " #");
 
       int memRead = 0;
       int memWrite = 0;
@@ -246,14 +270,15 @@ public class Main {
       int rdValue = decodeExecuteReg.get("rdValue");
       int rd = decodeExecuteReg.get("rd");
       // print these inputs
-      System.out.println("Inputs:\nRS Value:" + rsValue);
-      System.out.println("RT Value:" + rtValue);
-      System.out.println("RD (R" + rd + ") Value:" + rdValue);
-      // print opcode , shamt, immediate, and address
-      System.out.println("Opcode:" + decodeExecuteReg.get("opcode"));
-      System.out.println("Shamt:" + decodeExecuteReg.get("shamt"));
-      System.out.println("Immediate:" + decodeExecuteReg.get("immediate"));
-      System.out.println("Address:" + decodeExecuteReg.get("address"));
+      System.out.println("\nInputs:");
+      System.out.println("PC: " + currPc);
+      System.out.println("Read Data 1: " + rsValue);
+      System.out.println("Read Data 2: " + rtValue);
+      System.out.println("RD (R" + rd + ") Value: " + rdValue);
+      System.out.println("Opcode: " + decodeExecuteReg.get("opcode"));
+      System.out.println("Shamt: " + decodeExecuteReg.get("shamt"));
+      System.out.println("Immediate: " + decodeExecuteReg.get("immediate"));
+      System.out.println("Address: " + decodeExecuteReg.get("address"));
 
       // Get opcode from decodeExecuteReg
       int opcode = decodeExecuteReg.get("opcode");
@@ -328,6 +353,16 @@ public class Main {
       executeMemRegTemp.put("rd", rd);
       executeMemRegTemp.put("pc", currPc);
 
+      // print outputs
+      System.out.println("\nOutputs:");
+      System.out.println("PC: " + currPc);
+      System.out.println("MemRead: " + memRead);
+      System.out.println("MemWrite: " + memWrite);
+      System.out.println("ALU Output: " + output);
+      System.out.println("RD (R" + rd + ") Value: " + rdValue);
+      // opcode and pc
+      System.out.println("Opcode: " + opcode);
+
       // Reset executeRepeat
       executeRepeat = 0;
 
@@ -345,7 +380,7 @@ public class Main {
       // new instruction was executed
       memoryCurrent = currPc;
 
-      System.out.println("Memory Stage: Instruction " + (currPc));
+      System.out.println("[4] Memory Stage  # Instruction " + (currPc) + " #");
 
       int memRead = executeMemReg.get("memRead");
       int memWrite = executeMemReg.get("memWrite");
@@ -353,7 +388,9 @@ public class Main {
       int opcode = executeMemReg.get("opcode");
       int rd = executeMemReg.get("rd");
       // print the inputs like above
-      System.out.println("Inputs: ");
+      System.out.println("\nInputs: ");
+      // pc
+      System.out.println("PC: " + currPc);
       System.out.println("MemRead: " + memRead);
       System.out.println("MemWrite: " + memWrite);
       System.out.println("Address: " + address);
@@ -376,6 +413,14 @@ public class Main {
       memWBRegTemp.put("opcode", opcode);
       memWBRegTemp.put("rd", rd);
 
+      // print outputs
+      System.out.println("\nOutputs:");
+      System.out.println("PC: " + currPc);
+      System.out.println("Read Data: " + readData);
+      System.out.println("ALU Output: " + address);
+      System.out.println("RD (R" + rd + ") Value: " + executeMemReg.get("rdValue"));
+      System.out.println("Opcode: " + opcode);
+
       executeMemReg.putAll(executeMemRegTemp);
 
    }
@@ -391,12 +436,20 @@ public class Main {
       // new instruction was in memory
       wbCurrent = currPc;
 
-      System.out.println("Write Back Stage: Instruction " + (currPc));
+      System.out.println("\n[5] Write Back Stage  # Instruction " + (currPc) + " #");
 
       int readData = memWBReg.get("readData");
       int aluOutput = memWBReg.get("aluOutput");
       int opcode = memWBReg.get("opcode");
       int rd = memWBReg.get("rd");
+
+      // print inputs
+      System.out.println("\nInputs:");
+      System.out.println("PC: " + currPc);
+      System.out.println("Read Data: " + readData);
+      System.out.println("ALU Output: " + aluOutput);
+      System.out.println("Opcode: " + opcode);
+      System.out.println("RD : R" + rd);
 
       if (opcode == 4 || opcode == 7 || opcode == 11) {
          // will not write back
@@ -404,15 +457,12 @@ public class Main {
          // LW
          int toStore = rd == 0 ? 0 : readData;
          registers[rd] = toStore;
-         System.out.println("Setting R" + rd + " = " + toStore);
-         System.out.println("Actual\nR" + rd + " = " + registers[rd]);
+         System.out.println("\nSetting R" + rd + " = " + toStore);
       } else {
          // all other instructions
          int toStore = rd == 0 ? 0 : aluOutput;
          registers[rd] = toStore;
-         System.out.println("Setting R" + rd + " = " + toStore);
-         System.out.println("Actual\nR" + rd + " = " + registers[rd]);
-
+         System.out.println("\nSetting R" + rd + " = " + toStore);
       }
 
       memWBReg.putAll(memWBRegTemp);
@@ -427,14 +477,20 @@ public class Main {
          System.out.println(Parser.toBinary(main.memory[i]));
       }
 
-      int loop = 7 + (numOfInst - 1) * 2;
-      for (int i = 1; i <= loop; i++) {
+      System.out.println("Number of instructions: " + numOfInst);
+
+      // int loop = 7 + (numOfInst - 1) * 2;
+      int nSoFar = 0;
+      for (int i = 1; i <= (7 + (nSoFar - 1) * 2); i++) {
          main.isBranching = false;
          System.out.println("\n========================");
          System.out.println("        Cycle " + i);
          System.out.println("========================");
 
          if (i % 2 == 1) {
+            if (main.pc < numOfInst) {
+               nSoFar++;
+            }
             main.fetch();
             System.out.println();
          }
@@ -443,17 +499,24 @@ public class Main {
          main.execute();
          System.out.println();
          // if branching
-         if (main.isBranching) {
-            main.isBranching = false;
-            continue;
-         }
          main.memory();
          main.writeBack();
+
+         if (main.isBranching) {
+            main.isBranching = false;
+            main.resetAllVariables();
+         }
+
          System.out.println();
+
       }
+
+      System.out.println("\n============= END =============\n");
 
       // print all registers and their values
       System.out.println("Registers:");
+      // pc
+      System.out.println("PC: " + main.pc);
       for (int i = 0; i < 32; i++) {
          System.out.println("R" + i + ": " + main.registers[i]);
       }
@@ -461,15 +524,37 @@ public class Main {
       System.out.println();
 
       // print all memory addresses and their values
+
       System.out.println("Memory:\n");
       System.out.println("Instructions:");
       for (int i = 0; i < 2048; i++) {
          if (i < 1024)
-            System.out.println("Memory[" + i + "]: " + Parser.toBinary(main.memory[i]));
+            System.out.println("[" + i + "]: " + Parser.toBinary(main.memory[i]));
          else
-            System.out.println("Memory[" + i + "]: " + main.memory[i]);
+            System.out.println("[" + i + "]: " + main.memory[i]);
          if (i == 1023)
             System.out.println("\nData:");
       }
+   }
+
+   private void resetAllVariables() {
+      fetchDecodeReg.clear();
+      fetchDecodeRegTemp.clear();
+      decodeExecuteReg.clear();
+      decodeExecuteRegTemp.clear();
+      executeMemReg.clear();
+      executeMemRegTemp.clear();
+      memWBReg.clear();
+      memWBRegTemp.clear();
+
+      decodeRepeat = 0;
+      decodeCurrent = -1;
+
+      executeRepeat = 0;
+      executeCurrent = -1;
+
+      memoryCurrent = -1;
+
+      wbCurrent = -1;
    }
 }
