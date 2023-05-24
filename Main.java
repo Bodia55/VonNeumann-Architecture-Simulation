@@ -322,6 +322,8 @@ public class Main {
                // IF(R1 != R2) {PC = PC+1+IMM }
                if (rdValue != rsValue) {
                   pc = currPc + immediate;
+                  // print
+                  System.out.println("\nSetting PC to " + pc);
                   isBranching = true;
                }
                break;
