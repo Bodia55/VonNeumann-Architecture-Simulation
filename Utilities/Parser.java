@@ -51,7 +51,7 @@ public class Parser {
                 instruction = 8;
                 type = "R";
                 break;
-            case "SLR":
+            case "SRL":
                 instruction = 9;
                 type = "R";
                 break;

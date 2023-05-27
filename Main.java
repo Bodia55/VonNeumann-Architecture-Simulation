@@ -475,10 +475,6 @@ public class Main {
       Main main = new Main();
       int numOfInst = main.loadProgram("program.txt");
 
-      for (int i = 0; i < 9; i++) {
-         System.out.println(Parser.toBinary(main.memory[i]));
-      }
-
       System.out.println("Number of instructions: " + numOfInst);
 
       // int loop = 7 + (numOfInst - 1) * 2;
